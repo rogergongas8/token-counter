@@ -96,6 +96,53 @@
     <p class="muted small">Base per-token prices only. Prompt caching, batch discounts, long-context tiers, tools and regional uplifts can change the real bill. You can type your own prices above.</p>
   </section>
 
+  <section class="card" aria-labelledby="cmp-h">
+    <h2 id="cmp-h">Compare models for your usage</h2>
+    <p class="muted">Ranks models by what <em>your</em> usage would cost, using the input tokens, output tokens and requests per month from the calculator above. <span id="catNote"></span></p>
+    <div class="grid filters">
+      <div>
+        <label for="q" class="label">Search</label>
+        <input id="q" type="search" placeholder="gpt, claude, llama…">
+      </div>
+      <div>
+        <label for="prov" class="label">Provider</label>
+        <select id="prov"><option value="">All providers</option></select>
+      </div>
+      <div>
+        <label for="minCtx" class="label">Minimum context window</label>
+        <select id="minCtx">
+          <option value="0">Any</option>
+          <option value="32000">32K</option>
+          <option value="128000">128K</option>
+          <option value="200000">200K</option>
+          <option value="1000000">1M</option>
+        </select>
+      </div>
+      <div>
+        <label for="sort" class="label">Sort by</label>
+        <select id="sort">
+          <option value="cost">Cheapest first</option>
+          <option value="new">Newest first</option>
+          <option value="ctx">Largest context first</option>
+        </select>
+      </div>
+      <div class="check">
+        <label><input id="needImg" type="checkbox"> Accepts images</label>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table class="prices">
+        <thead><tr><th>Model</th><th>Context</th><th>Input $/1M</th><th>Output $/1M</th><th>Per request</th><th>Per month</th></tr></thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+    </div>
+    <div class="row actions">
+      <button id="more" type="button" class="ghost">Show more</button>
+      <span id="cmpCount" class="muted small" role="status"></span>
+    </div>
+    <p class="muted small">Prefer a plain list? Browse <a href="prices/">all model prices</a> or a single provider such as <a href="prices/openai.html">OpenAI</a>, <a href="prices/anthropic.html">Anthropic</a> or <a href="prices/google.html">Google</a>.</p>
+  </section>
+
   <section class="card" aria-labelledby="notes-h">
     <h2 id="notes-h">How accurate are these counts?</h2>
     <ul>
@@ -120,7 +167,7 @@
 </main>
 
 <footer class="wrap muted small">
-  <p>Pricing sources: <a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">Claude pricing</a> · <a href="https://developers.openai.com/api/docs/pricing" rel="noopener">OpenAI pricing</a>. Independent tool, not affiliated with Anthropic or OpenAI. Tokenizer: <a href="https://github.com/niieani/gpt-tokenizer" rel="noopener">gpt-tokenizer</a> (MIT).</p>
+  <p>Pricing sources: <a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">Claude pricing</a> · <a href="https://developers.openai.com/api/docs/pricing" rel="noopener">OpenAI pricing</a> · model catalog from <a href="https://openrouter.ai/models" rel="noopener">OpenRouter</a> · <a href="prices/">all model prices</a>. Independent tool, not affiliated with Anthropic or OpenAI. Tokenizer: <a href="https://github.com/niieani/gpt-tokenizer" rel="noopener">gpt-tokenizer</a> (MIT).</p>
 </footer>
 
 <script src="app.js" type="module"></script>
