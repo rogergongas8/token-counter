@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Counter for GPT &amp; Claude — Free LLM Token and Cost Calculator</title>
+<meta name="description" content="Free token counter that runs in your browser. Paste text to count tokens with OpenAI tokenizers, estimate Claude usage, and calculate API cost. Your text never leaves your device.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b5bdb'/%3E%3Ctext x='16' y='22' font-size='16' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='white'%3ET%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"What is a token?","acceptedAnswer":{"@type":"Answer","text":"A token is a chunk of text, often a word, part of a word, or punctuation mark, that a language model reads and writes. Models are limited and billed by tokens, not characters or words."}},
+    {"@type":"Question","name":"How many words is a token?","acceptedAnswer":{"@type":"Answer","text":"For typical English text a token is roughly three quarters of a word, or about four characters. Code, numbers, and non-English languages often use more tokens per word."}},
+    {"@type":"Question","name":"Why do token counts differ between models?","acceptedAnswer":{"@type":"Answer","text":"Each model family uses its own tokenizer with its own vocabulary, so the same text can produce different counts. This tool is exact only for the OpenAI encodings it names and gives an estimate for other models."}},
+    {"@type":"Question","name":"Is my text sent to a server?","acceptedAnswer":{"@type":"Answer","text":"No. Counting happens entirely in your browser. Nothing you paste is uploaded or stored."}}
+  ]
+}
+</script>
+</head>
+<body>
+<header class="wrap">
+  <h1>Token Counter</h1>
+  <p class="lede">Count tokens for GPT-style tokenizers, estimate Claude usage, and work out what your prompts cost. Runs in your browser; your text is never uploaded.</p>
+</header>
+
+<main class="wrap">
+  <section class="card" aria-labelledby="count-h">
+    <h2 id="count-h" class="sr">Count tokens</h2>
+    <label for="text" class="label">Paste or type your text</label>
+    <textarea id="text" rows="9" placeholder="Paste a prompt, document or code here…" spellcheck="false"></textarea>
+    <div class="row actions">
+      <button id="sample" type="button" class="ghost">Insert sample</button>
+      <button id="clear" type="button" class="ghost">Clear</button>
+      <span id="status" class="muted" role="status"></span>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><span class="k">Characters</span><span class="v" id="chars">0</span></div>
+      <div class="stat"><span class="k">Words</span><span class="v" id="words">0</span></div>
+      <div class="stat primary"><span class="k">o200k_base tokens</span><span class="v" id="t200">0</span><span class="note">Exact for this encoding (GPT-4o family)</span></div>
+      <div class="stat"><span class="k">cl100k_base tokens</span><span class="v" id="t100">0</span><span class="note">Exact for this encoding (GPT-4 / 3.5)</span></div>
+      <div class="stat"><span class="k">Claude (estimate)</span><span class="v" id="tclaude">0</span><span class="note">Estimate; see notes below</span></div>
+    </div>
+
+    <details class="viz">
+      <summary>Show how the text is split into tokens (o200k_base)</summary>
+      <div id="viz" class="tokens" aria-live="polite"></div>
+      <p class="muted small" id="vizNote"></p>
+    </details>
+  </section>
+
+  <section class="card" aria-labelledby="cost-h">
+    <h2 id="cost-h">API cost calculator</h2>
+    <p class="muted">Prices are per 1 million tokens. Pre-filled from each provider's public pricing page on <strong>2026-11-09</strong>. Always check the source before budgeting.</p>
+    <div class="grid">
+      <div>
+        <label for="model" class="label">Model</label>
+        <select id="model"></select>
+      </div>
+      <div>
+        <label for="inTok" class="label">Input tokens per request</label>
+        <input id="inTok" type="number" min="0" step="1" value="1000">
+      </div>
+      <div>
+        <label for="outTok" class="label">Output tokens per request</label>
+        <input id="outTok" type="number" min="0" step="1" value="500">
+      </div>
+      <div>
+        <label for="reqs" class="label">Requests per month</label>
+        <input id="reqs" type="number" min="0" step="1" value="1000">
+      </div>
+      <div>
+        <label for="pIn" class="label">Input price ($/1M tokens)</label>
+        <input id="pIn" type="number" min="0" step="0.01">
+      </div>
+      <div>
+        <label for="pOut" class="label">Output price ($/1M tokens)</label>
+        <input id="pOut" type="number" min="0" step="0.01">
+      </div>
+    </div>
+    <div class="row actions">
+      <button id="useText" type="button" class="ghost">Use token count from the text above as input</button>
+    </div>
+    <p id="priceNote" class="muted small"></p>
+
+    <div class="stats cost">
+      <div class="stat primary"><span class="k">Cost per request</span><span class="v" id="costReq">$0</span></div>
+      <div class="stat"><span class="k">Cost per month</span><span class="v" id="costMonth">$0</span></div>
+      <div class="stat"><span class="k">Cost per year</span><span class="v" id="costYear">$0</span></div>
+    </div>
+    <p class="muted small">Base per-token prices only. Prompt caching, batch discounts, long-context tiers, tools and regional uplifts can change the real bill. You can type your own prices above.</p>
+  </section>
+
+  <section class="card" aria-labelledby="notes-h">
+    <h2 id="notes-h">How accurate are these counts?</h2>
+    <ul>
+      <li><strong>OpenAI encodings (o200k_base, cl100k_base):</strong> exact for those encodings. Which encoding a specific newer OpenAI model uses isn't something this tool can confirm, so treat model-specific counts as close, not guaranteed.</li>
+      <li><strong>Claude:</strong> Anthropic's tokenizer isn't published for offline use, so the figure above is an estimate based on a public tokenizer and can differ from the real count. For billing-grade numbers use the token counting feature of the Claude API.</li>
+      <li><strong>Other models (Gemini, Llama, Mistral…):</strong> each has its own tokenizer. Use these numbers as a rough guide only.</li>
+      <li><strong>Overhead:</strong> chat formatting, system prompts, tool definitions and images add tokens that aren't in your pasted text.</li>
+    </ul>
+  </section>
+
+  <section class="card faq" aria-labelledby="faq-h">
+    <h2 id="faq-h">FAQ</h2>
+    <h3>What is a token?</h3>
+    <p>A token is a chunk of text, often a word, part of a word, or a punctuation mark, that a language model reads and writes. Models have limits and prices measured in tokens, not characters or words.</p>
+    <h3>How many words is a token?</h3>
+    <p>For typical English a token is about three quarters of a word, or around four characters. Code, numbers and many non-English languages use more tokens for the same amount of text.</p>
+    <h3>Why do token counts differ between models?</h3>
+    <p>Each model family has its own tokenizer and vocabulary, so the same text can produce different counts. That is why this page shows several counts side by side.</p>
+    <h3>Is my text sent anywhere?</h3>
+    <p>No. Counting runs entirely in your browser using a JavaScript tokenizer. Nothing you paste is uploaded or stored.</p>
+  </section>
+</main>
+
+<footer class="wrap muted small">
+  <p>Pricing sources: <a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">Claude pricing</a> · <a href="https://developers.openai.com/api/docs/pricing" rel="noopener">OpenAI pricing</a>. Independent tool, not affiliated with Anthropic or OpenAI. Tokenizer: <a href="https://github.com/niieani/gpt-tokenizer" rel="noopener">gpt-tokenizer</a> (MIT).</p>
+</footer>
+
+<script src="app.js" type="module"></script>
+</body>
+</html>
