@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# Replace with your real domain after publishing:
-# Sitemap: https://YOUR-DOMAIN/sitemap.xml
+Sitemap: https://token-counter-bice.vercel.app/sitemap.xml
