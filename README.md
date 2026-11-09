@@ -45,3 +45,11 @@ npx esbuild src/cl100k.js --bundle --minify --format=esm --outfile=../js/cl100k.
 - El recuento de Claude es una **estimación** (el tokenizador de Anthropic no es público). Está indicado en la web.
 - Los precios son los base por token; no incluyen caché, descuentos por lotes ni recargos regionales.
 - No hay anuncios ni afiliados todavía. Añádelos solo cuando haya tráfico.
+
+## Catálogo de modelos y precios (actualización automática)
+- `scripts/update-models.mjs` descarga la lista pública de modelos de OpenRouter y genera `data/models.json`, las páginas estáticas `prices/*.html` y `sitemap.xml`. No escribe nada si no hay cambios.
+- `.github/workflows/update-models.yml` lo ejecuta cada día (04:17 UTC) y también a mano desde la pestaña Actions de GitHub. Si hay cambios, hace commit y Vercel despliega solo.
+- La web carga `data/models.json` al abrirse; si falla, muestra solo los modelos principales.
+- Los precios del catálogo son los que lista OpenRouter y pueden diferir de los del proveedor. Los 8 modelos principales de `app.js` se copiaron de las páginas oficiales (2026-11-09) y esos hay que revisarlos a mano.
+
+Probar en local: `node scripts/update-models.mjs` y `python3 -m http.server 8765`.
