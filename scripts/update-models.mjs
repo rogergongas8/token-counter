@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SITE = 'https://token-counter-bice.vercel.app';
+const SITE = 'https://token-counter-teal.vercel.app';
 const SOURCE = 'https://openrouter.ai/api/v1/models';
 const MIN_MODELS = 100; // safety: refuse to overwrite the site with a broken/partial response
 
